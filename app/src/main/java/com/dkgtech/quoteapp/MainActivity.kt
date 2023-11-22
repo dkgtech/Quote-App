@@ -2,7 +2,6 @@ package com.dkgtech.quoteapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dkgtech.quoteapp.databinding.ActivityMainBinding
 import retrofit2.Call
@@ -13,7 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var quotes: MutableList<Quote> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -29,33 +27,29 @@ class MainActivity : AppCompatActivity() {
         val retrofit = Retrofit.Builder().baseUrl("https://dummyjson.com/")
             .addConverterFactory(GsonConverterFactory.create()).build()
             .create(ApiInterface::class.java)
-        val response = retrofit.getQuotes().enqueue(object : Callback<List<QuoteModel>> {
-            override fun onResponse(
-                call: Call<List<QuoteModel>>,
-                response: Response<List<QuoteModel>>
-            ) {
-                val responseBody = response.body().let {
-                    if (it != null) {
-                        quotes.add(it)
-                        Log.d("main", it.toString())
+
+        retrofit.getQuotes().enqueue(object : Callback<QuoteModel> {
+            override fun onResponse(call: Call<QuoteModel>, response: Response<QuoteModel>) {
+                if (response.code() == 200) {
+                    response.body().let {
+                        for (quote in response.body()?.quotes!!) {
+                            binding.rcViewQuotes.layoutManager =
+                                LinearLayoutManager(this@MainActivity)
+                            binding.rcViewQuotes.adapter =
+                                RecyclerQuoteAdapter(this@MainActivity, response.body()!!.quotes)
+                        }
                     }
                 }
-                if (response.isSuccessful) {
-                    binding.rcViewQuotes.layoutManager = LinearLayoutManager(this@MainActivity)
-                    binding.rcViewQuotes.adapter =
-                        RecyclerQuoteAdapter(this@MainActivity, arrQuotes = quotes)
-                    Log.d("main", quotes.toString())
-                }
-
             }
 
-            override fun onFailure(call: Call<List<QuoteModel>>, t: Throwable) {
-                Log.d("main", t.message.toString())
+            override fun onFailure(call: Call<QuoteModel>, t: Throwable) {
+                TODO("Not yet implemented")
             }
 
         })
 
     }
+
 }
 
 

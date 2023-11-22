@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dkgtech.quoteapp.databinding.QuoteRowBinding
 
-class RecyclerQuoteAdapter(val context: Context, val arrQuotes: MutableList<Quote>) :
+class RecyclerQuoteAdapter(private val context: Context, private val arrQuotes: List<Quote>) :
     RecyclerView.Adapter<RecyclerQuoteAdapter.ViewHolder>() {
     class ViewHolder(val binding: QuoteRowBinding) : RecyclerView.ViewHolder(binding.root) {
 
@@ -22,7 +22,9 @@ class RecyclerQuoteAdapter(val context: Context, val arrQuotes: MutableList<Quot
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.binding) {
-            txtQuote.text = arrQuotes[position].quote
+            val data = arrQuotes[position]
+            txtQuote.text = data.quote
+            "~ ${data.author}".also { txtAuthor.text = it }
         }
     }
 }
